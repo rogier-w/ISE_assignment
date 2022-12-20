@@ -7,4 +7,5 @@
 import socket
 import time
 
-def test(): 
+print('hello')
+print('hello')
