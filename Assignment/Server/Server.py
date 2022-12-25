@@ -78,8 +78,7 @@ def checkuserandpass(userandpass):
 
 
 print('server starting')
-<<<<<<< Updated upstream
+
 start()
-=======
-start()
->>>>>>> Stashed changes
+
+
