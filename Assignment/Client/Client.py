@@ -3,50 +3,73 @@
 #
 #
 #
-
-import socket
 import time
+import socket
 
-#Specification 1 Establish a connection to the server
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+HEADER = 64
+PORT = 5050
+FORMAT = 'utf-8'
+DISCONNECT_MESSAGE = "!DISCONNECT"
+SERVER = socket.gethostbyname(socket.gethostname())
+ADDR = (SERVER, PORT)
 
-server_host = "123.456.789.0" 
-server_port = 1234  
+def start():
 
-s.connect((server_host, server_port))
-message = "Hello"
-print(f"Sending {message}")
-s.sendall(message)
-data = s.recv(1024)
-print(f"Received {data}")
+    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client.connect(ADDR)
+    return client
 
-s.close()
+
+def send(msg, client):
+    message = msg.encode(FORMAT)
+    msg_length = len(message)
+    send_length = str(msg_length).encode(FORMAT)
+    send_length += b' ' * (HEADER - len(send_length))
+    client.send(send_length)
+    client.send(message)
+    backmsg = (client.recv(2048).decode(FORMAT))
+    print(backmsg)
+
+    return backmsg
+
 
 
 #Specification 2 allow user to log in with credentials 
-with open("Credentials.text", "r") as f:
-    credentials = [line.strip().split(",") for line in f]
+def checkpassword(chosenoption):
 
-# Ask the user to enter their username and password and give the possibility to create credentials
-checkforaccount = input("If you have not created an account yet please type 0, if you have an account please type 1.")
-
-if checkforaccount == str(0):
-    newusername = input("Enter your desired username here:")
-    newpassword = input("Enter your desired password here:")
-
-    with open("Credentials.text", "a") as appendnew:
-        appendnew.write("\n")
-        appendnew.append(str(newusername), str(newpassword))
+    if chosenoption == str(0):
+        username = input("Enter your desired username here: ")
+        password = input("Enter your desired password here: ")
+        return f"{username} {password}.!{chosenoption}"
 
 
-if checkforaccount == str(1):
-    username = input("Enter your username: ")
-    password = input("Enter your password: ")
 
-# Check if the entered username and password match any of the sets of credentials
-for user, pwd in credentials:
-    if username == user and password == pwd:
-        print("Logged in!")
-        break
-else:
-    print("Invalid credentials. Please try again.")
+
+    elif chosenoption == str(1):
+        username = input("Enter your username: ")
+        password = input("Enter your password: ")
+        return f"{username} {password}.!{chosenoption}"
+
+    # Check if the entered username and password match any of the sets of credentials
+
+while True:
+    client = start()
+    send('hello server I would like to make contact',client)
+    chosenoption = input('')
+    returnmsg = send(checkpassword(chosenoption), client)
+
+    if returnmsg=='invalid credentials':
+        continue
+
+
+
+
+
+
+
+
+    # Ask the user to enter their username and password and give the possibility to create credentials
+
+
+
+
