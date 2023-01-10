@@ -14,33 +14,38 @@ sock.connect((HOST, PORT))
 
 while True:
     # Display the menu
-    print('Menu: \n1. View files\n2. Download file\n3. Upload file')
+    print('Menu: \n1 - View files\n2 - Download file\n3 - Upload file')
     # Get the user's selection
     choice = input('Enter your choice: ')
 
     if choice == '1':
-        # Send the 'list' command to the server
-        sock.send('list'.encode())
 
-        # Receive the list of files from the server
-        file_list = sock.recv(BUFFER_SIZE).decode()
+        print('Which files do you want to view?: \n1 - Server\n2 - Local')
+        # Get the user's selection
+        choice2 = input('Enter your choice: ')
 
-        # Split the list of files into a Python list
-        file_list = file_list.split()
+        if choice2 == '1':
+            # Send the 'list' command to the server
+            sock.send('list'.encode())
 
-        # Display the list of files
-        print('Files on server:')
-        for file in file_list:
-            print(file)
+            # Receive the list of files from the server
+            file_list = sock.recv(BUFFER_SIZE).decode()
 
+            # Split the list of files into a Python list
+            file_list = file_list.split()
+            # Display the list of files
+            print('Files on server:')
+            for file in file_list:
+                print(file)
+
+        if choice2 == '2':
         # Ask the user if they want to see local files
-        view_local = input('View local files? (y/n) ')
-        if view_local == 'y':
             # Get a list of local files
             local_files = os.listdir()
             print('Files on local:')
             for file in local_files:
                 print(file)
+
     elif choice == '2':
         # Ask the user for the file they want to download
         file_name = input('Enter the file to download: ')
@@ -76,4 +81,5 @@ while True:
                 chunk = file.read(BUFFER_SIZE)
         print(f'File {file_name} uploaded')
 
-    sock.close()
+sock.close()
+
