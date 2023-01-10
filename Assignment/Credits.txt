@@ -3,5 +3,8 @@ Made by group: 11
 
  Names	StudentNumbers
 - Rogier Wijnants 5644402
-- 
--
+- Suus Plaum 5353688
+- Oscar Lodeizen 5402166
+- Julius Jorna 5553318
+- Milan Sonneveld 5624770
+
