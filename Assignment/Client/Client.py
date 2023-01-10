@@ -3,12 +3,12 @@ import time
 import socket
 
 HEADER = 64
-PORT = 5050
+PORT = 2088
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "!DISCONNECT"
 SERVER = socket.gethostbyname(socket.gethostname())
 ADDR = (SERVER, PORT)
-
+t=0
 def start():
 
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -36,7 +36,7 @@ def checkpassword(chosenoption):
     if chosenoption == str(0):
         username = input("Enter your desired username here: ")
         password = input("Enter your desired password here: ")
-        return f"{username} {password}.!{chosenoption}"
+        return f"{username}.!{password}.!{chosenoption}"
 
 
 
@@ -44,18 +44,30 @@ def checkpassword(chosenoption):
     elif chosenoption == str(1):
         username = input("Enter your username: ")
         password = input("Enter your password: ")
-        return f"{username} {password}.!{chosenoption}"
+        return f"{username}.!{password}.!{chosenoption}"
 
     # Check if the entered username and password match any of the sets of credentials
 
 while True:
-    client = start()
-    send('hello server I would like to make contact',client)
-    chosenoption = input('')
-    returnmsg = send(checkpassword(chosenoption), client)
 
-    if returnmsg=='invalid credentials':
-        continue
+    client = start()
+    if t==0:
+
+        send('hello server I would like to make contact',client)
+        chosenoption = input('')
+        returnmsg = send(checkpassword(chosenoption), client)
+        if returnmsg == 'invalid credentials':
+            t = 0
+            continue
+        else:
+            t=1
+    elif t==1:
+        l = input('')
+        send('l', client)
+
+
+
+
 
 
 
