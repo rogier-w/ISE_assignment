@@ -40,7 +40,7 @@ while True:
         # Check if the file exists
         if not os.path.exists(file_name):
             # Send an error message to the client
-            connection.send(b'Error: File does not exist')
+            connection.send('Error: File does not exist'.encode())
         else:
             # Open the file for reading
             with open(file_name, 'rb') as file:
@@ -49,6 +49,7 @@ while True:
                 while chunk:
                     connection.send(chunk)
                     chunk = file.read(BUFFER_SIZE)
+
     # Check if the command is 'upload'
     elif command == 'upload':
         # Open the file for writing
@@ -58,6 +59,6 @@ while True:
             while chunk:
                 file.write(chunk)
                 chunk = connection.recv(BUFFER_SIZE)
-    # Check if the command is 'exit'
+
     connection.close()
     print(f'Connection to {client_address} closed')
