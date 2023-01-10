@@ -1,8 +1,4 @@
-# Author information
-# ...
-#
-#
-#
+# Group 11 - Suus Plaum, Oscar Lodeizen, Julius Jorna, Milan Sonneveld, Rogier Wijnants
 import time
 import socket
 

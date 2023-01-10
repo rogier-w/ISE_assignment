@@ -62,5 +62,5 @@ while True:
                 # Write the file contents to the file
                 file.write(file_contents)
             print('File uploaded')
-
+    #Close the client socket
     client_socket.close()
