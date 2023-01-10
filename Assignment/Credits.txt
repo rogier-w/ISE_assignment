@@ -1,4 +1,4 @@
-App/team name: IES group 11
+App/team name: StoreHive
 Made by group: 11
 
  Names	StudentNumbers
