@@ -47,10 +47,10 @@ def checkpassword(chosenoption):
         return f"{username}.!{password}.!{chosenoption}"
 
     # Check if the entered username and password match any of the sets of credentials
-
+client = start()
 while True:
 
-    client = start()
+
     if t==0:
 
         send('hello server I would like to make contact',client)
@@ -62,8 +62,19 @@ while True:
         else:
             t=1
     elif t==1:
-        l = input('')
-        send('l', client)
+        backmsg = (client.recv(2048).decode(FORMAT))
+        print(backmsg)
+
+        while True:
+
+
+            l = input('')
+            t = send(l, client)
+            if 'invalid' in t:
+                backmsg = (client.recv(2048).decode(FORMAT))
+                print(backmsg)
+
+
 
 
 
