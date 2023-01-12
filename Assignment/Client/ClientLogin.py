@@ -108,7 +108,8 @@ while True:
 
                     file_list = send(file, client)
                     time.sleep(5)
-                    print('received files')
+                    backmsg = (client.recv(2048).decode(FORMAT))
+                    print(backmsg)
 
 
                 # Split the list of files into a Python list
