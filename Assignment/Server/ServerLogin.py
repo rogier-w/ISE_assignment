@@ -69,29 +69,35 @@ Please enter a number: '''.encode(FORMAT))
                         print(f"[{addr}] {msg}")
                         writetochatlog(username, msg)
                     elif '2' == msg1:
-                        conn.send('Please enter a filename: '.encode())
-                        filename = conn.recv(2048).decode(FORMAT)
-                        with open(filename, 'wb') as file:
+                        conn.send('Please enter a filename: '.encode(FORMAT))
+                        msg_length1 = conn.recv(HEADER).decode(FORMAT)
+                        msg_length1 = int(msg_length1)
+                        filename = conn.recv(msg_length1).decode(FORMAT)
+                        print(filename)
+                        conn.send('uploading file'.encode(FORMAT))
+                        msg_length1 = conn.recv(HEADER).decode(FORMAT)
+                        msg_length1 = int(msg_length1)
+
+                        filedata = conn.recv(msg_length1).decode(FORMAT)
+                        print(filedata)
+                        with open(filename, 'w') as file:
                             # Receive the file in chunks and write each chunk to the file
-                            chunk = conn.recv(BUFFER_SIZE)
-                            while chunk:
-                                file.write(chunk)
-                                chunk = conn.recv(BUFFER_SIZE)
+                            file.write(filedata)
 
                     elif '3' == msg1:
-                        conn.send('Please enter a filename: '.encode())
-                        filename = conn.recv(2048).decode(FORMAT)
+
+                        conn.send('Please enter a filename: '.encode(FORMAT))
+                        msg_length1 = conn.recv(HEADER).decode(FORMAT)
+                        msg_length1 = int(msg_length1)
+                        filename = conn.recv(msg_length1).decode(FORMAT)
+                        filename = conn.recv(msg_length1).decode(FORMAT)
                         if not os.path.exists(filename):
                             # Send an error message to the client
                             conn.send('Error: File does not exist'.encode())
                         else:
                             # Open the file for reading
-                            with open(filename, 'rb') as file:
-                                # Read the file in chunks and send each chunk to the client
-                                chunk = file.read(BUFFER_SIZE)
-                                while chunk:
-                                    conn.send(chunk)
-                                    chunk = file.read(BUFFER_SIZE)
+                            data = readfile(filename)
+                            conn.send(data.encode(FORMAT))
 
                     elif '4' == msg1:
                         conn.send('Do you want to view server files or local files?\n1 - Server\n2 - Local'.encode(FORMAT))
@@ -104,20 +110,14 @@ Please enter a number: '''.encode(FORMAT))
                         if msg == '1':
                             filelist = ''
                             for file in os.listdir(os.getcwd()):
-                                print(file)
+
                                 filelist += file + '\n'
-                            conn.send(filelist.encode(FORMAT))
-                        elif msg == '2':
-                            filelist = ''
-                            for file in os.listdir(os.getcwd()):
-                                print(file)
-                                filelist += file + '\n'
-                            conn.send(filelist.encode(FORMAT))
+                            conn.send(('Files: \n' +filelist).encode(FORMAT))
+
                     elif msgback == DISCONNECT_MESSAGE:
                         connected = False
                         conn.close()
-                    else:
-                        conn.send('invalid choice try again \n'.encode(FORMAT))
+
 
 
 def login(conn):
@@ -203,6 +203,9 @@ def writetochatlog(user, message):
 def readchat():
 
     txt = Path('chatlog.txt').read_text() +'\n please enter a message '
+    return txt
+def readfile(filename):
+    txt = Path(filename).read_text()
     return txt
 
 print('server starting')
