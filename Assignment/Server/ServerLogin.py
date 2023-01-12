@@ -43,7 +43,7 @@ def handle_client(conn, addr):
                 if msgback == 'successfully logged in' or msgback == 'account made':
                     print('worked')
                 else:
-                    continue
+                    conn.close()
 
             while True:
                 conn.send('''Please select an option:
@@ -51,6 +51,7 @@ def handle_client(conn, addr):
     2 - upload file
     3 - download files
     4 - view files
+    5 - disconnect
 Please enter a number: '''.encode(FORMAT))
                 msg_length1 = conn.recv(HEADER).decode(FORMAT)
                 if msg_length1:
@@ -89,14 +90,15 @@ Please enter a number: '''.encode(FORMAT))
                         conn.send('Please enter a filename: '.encode(FORMAT))
                         msg_length1 = conn.recv(HEADER).decode(FORMAT)
                         msg_length1 = int(msg_length1)
-                        filename = conn.recv(msg_length1).decode(FORMAT)
-                        filename = conn.recv(msg_length1).decode(FORMAT)
-                        if not os.path.exists(filename):
+
+                        filename1 = conn.recv(msg_length1).decode(FORMAT)
+                        print(filename1)
+                        if not os.path.exists(filename1):
                             # Send an error message to the client
                             conn.send('Error: File does not exist'.encode())
                         else:
                             # Open the file for reading
-                            data = readfile(filename)
+                            data = readfile(filename1)
                             conn.send(data.encode(FORMAT))
 
                     elif '4' == msg1:
@@ -114,9 +116,10 @@ Please enter a number: '''.encode(FORMAT))
                                 filelist += file + '\n'
                             conn.send(('Files: \n' +filelist).encode(FORMAT))
 
-                    elif msgback == DISCONNECT_MESSAGE:
-                        connected = False
+                    elif msg1 == '5':
+
                         conn.close()
+
 
 
 

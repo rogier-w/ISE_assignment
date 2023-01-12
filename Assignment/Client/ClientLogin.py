@@ -72,8 +72,6 @@ while True:
                 print(backmsg)
 
 
-
-
             elif l == '2':
 
                 file_name = input('')
@@ -115,6 +113,8 @@ while True:
                 # Split the list of files into a Python list
                 file_list = file_list.split()
                 # Display the list of files
+
+
 
 
 
