@@ -138,42 +138,6 @@ def start():
         print("\n")
         print(f"[ACTIVE CONNECTION] {threading.active_count() - 1}")
 
-#def uploadfiles():
-    # Open the file for writing
-    #with open(filename, 'wb') as file:
-        # Receive the file in chunks and write each chunk to the file
-        #chunk = conn.recv(BUFFER_SIZE)
-       # while chunk:
-            #file.write(chunk)
-            #chunk = conn.recv(BUFFER_SIZE)
-
-#def downloadfiles(filename):
-    # Check if the file exists
-    #if not os.path.exists(filename):
-        # Send an error message to the client
-        #conn.send('Error: File does not exist'.encode())
-    #else:
-        # Open the file for reading
-        #with open(filename, 'rb') as file:
-            # Read the file in chunks and send each chunk to the client
-           # chunk = file.read(BUFFER_SIZE)
-            #while chunk:
-               # conn.send(chunk)
-                #chunk = file.read(BUFFER_SIZE)
-
-#def viewserverfiles():
-        # Get a list of available files on the server
-    #filelist = ''
-    #for file in os.listdir(os.getcwd()):
-        #filelist += file + '\n'
-       # conn.send(' '.join(filelist).encode())
-
-#def viewlocalfiles():
-   # file_list = ''
-    #for file in os.listdir():
-        #file_list += file + '\n'
-        #conn.send(' '.join(file_list).encode())
-
 def checkuserandpass(userandpass):
     userpasslist = userandpass.split('.!')
     userpassword = userpasslist[0]+userpasslist[1]
