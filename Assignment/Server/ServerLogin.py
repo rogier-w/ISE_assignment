@@ -1,3 +1,4 @@
+# Group 11 - Suus Plaum, Oscar Lodeizen, Julius Jorna, Milan Sonneveld, Rogier Wijnants
 import os
 import socket
 import threading
