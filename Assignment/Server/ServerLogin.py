@@ -6,6 +6,8 @@ import hashlib
 from datetime import datetime
 from pathlib import Path
 
+import chardet
+
 HEADER = 64
 BUFFER_SIZE = 1024
 PORT = 6000
@@ -208,7 +210,12 @@ def readchat():
     txt = Path('chatlog.txt').read_text() +'\n please enter a message '
     return txt
 def readfile(filename):
-    txt = Path(filename).read_text()
+    with open(filename, 'rb') as f:
+
+        txt = f.read()
+        encode = chardet.detect(f.read())
+        print(encode)
+        txt.decode(encode)
     return txt
 
 print('server starting')

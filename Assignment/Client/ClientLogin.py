@@ -2,6 +2,9 @@ import os
 import time
 import socket
 from pathlib import Path
+
+import chardet
+
 HEADER = 64
 PORT = 6000
 FORMAT = 'utf-8'
@@ -43,7 +46,12 @@ def checkpassword(chosenoption):
         return f"{username}.!{password}.!{chosenoption}"
 
 def readfile(filename):
-    txt = Path(filename).read_text()
+    with open(filename, 'rb') as f:
+
+        txt = f.read()
+        encode = chardet.detect(f.read())
+        print(encode)
+        txt.decode(encode)
     return txt
     # Check if the entered username and password match any of the sets of credentials
 client = start()
