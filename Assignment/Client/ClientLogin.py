@@ -1,6 +1,7 @@
 """
 @author: Group 11 - Suus Plaum, Oscar Lodeizen, Julius Jorna, Milan Sonneveld, Rogier Wijnants
 """
+import base64
 import os
 import time
 import socket
@@ -35,6 +36,14 @@ def send(msg, client):
 
     return backmsg
 
+def sendfile(msg, client):
+
+    client.send(msg)
+    backmsg = (client.recv(2048).decode(FORMAT))
+
+
+    return backmsg
+
 #Specification 2 allow user to log in with credentials
 def checkpassword(chosenoption):
 
@@ -51,11 +60,14 @@ def checkpassword(chosenoption):
 def readfile(filename):
     with open(filename, 'rb') as f:
 
-        txt = f.read()
-        encode = chardet.detect(f.read())
-        print(encode)
-        txt.decode(encode)
+        txt = base64.b64encode(f.read())
+
+
     return txt
+
+
+
+
     # Check if the entered username and password match any of the sets of credentials
 client = start()
 while True:
@@ -92,16 +104,39 @@ while True:
                 filedata = readfile(file_name)
                 print(f'File {file_name} uploaded')
 
-                send(filedata, client)
+                sendfile(filedata, client)
+
                 time.sleep(2)
+                send('test', client)
             elif l == '3':
 
                 filename1 = input('')
-                filedata = send(filename1, client)
-                with open(filename1, 'w') as file:
-                    file.write(filedata)
-                send(filedata, client)
+                message = filename1.encode(FORMAT)
+
+                msg_length = len(message)
+                send_length = str(msg_length).encode(FORMAT)
+                send_length += b' ' * (HEADER - len(send_length))
+                client.send(send_length)
+                client.send(message)
+                filedata = client.recv(4096 * 4096 * 32)
+
+
+                with open(filename1, 'wb') as file:
+                    txt = base64.b64decode(filedata+b'==')
+
+                    # Receive the file in chunks and write each chunk to the file
+                    file.write(txt)
+                msg='gelukt'
+                message = msg.encode(FORMAT)
+                msg_length = len(message)
+                send_length = str(msg_length).encode(FORMAT)
+                send_length += b' ' * (HEADER - len(send_length))
+                client.send(send_length)
+                client.send(message)
+                client.recv(2048).decode(FORMAT)
+
                 time.sleep(2)
+                print(client.recv(2048).decode(FORMAT))
 
 
             elif l == '4':

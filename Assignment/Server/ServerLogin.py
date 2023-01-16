@@ -1,6 +1,7 @@
 """
 @author: Group 11 - Suus Plaum, Oscar Lodeizen, Julius Jorna, Milan Sonneveld, Rogier Wijnants
 """
+import base64
 import os
 import socket
 import threading
@@ -76,27 +77,29 @@ Please enter a number: '''.encode(FORMAT))
                         writetochatlog(username, msg)
                     elif '2' == msg1:
                         conn.send('Please enter a filename: '.encode(FORMAT))
-                        msg_length1 = conn.recv(HEADER).decode(FORMAT)
-                        msg_length1 = int(msg_length1)
-                        filename = conn.recv(msg_length1).decode(FORMAT)
+                        msg_length5 = conn.recv(HEADER).decode(FORMAT)
+                        msg_length5 = int(msg_length5)
+                        filename = conn.recv(msg_length5).decode(FORMAT)
                         print(filename)
                         conn.send('uploading file'.encode(FORMAT))
-                        msg_length1 = conn.recv(HEADER).decode(FORMAT)
-                        msg_length1 = int(msg_length1)
 
-                        filedata = conn.recv(msg_length1).decode(FORMAT)
-                        print(filedata)
-                        with open(filename, 'w') as file:
+
+                        filedata = conn.recv(4096*4096*32)
+
+
+                        with open(filename, 'wb') as file:
+                            txt = base64.b64decode(filedata+b'==')
+
                             # Receive the file in chunks and write each chunk to the file
-                            file.write(filedata)
+                            file.write(txt)
 
                     elif '3' == msg1:
 
                         conn.send('Please enter a filename: '.encode(FORMAT))
-                        msg_length1 = conn.recv(HEADER).decode(FORMAT)
-                        msg_length1 = int(msg_length1)
+                        msg_length4 = conn.recv(HEADER).decode(FORMAT)
+                        msg_length4 = int(msg_length4)
 
-                        filename1 = conn.recv(msg_length1).decode(FORMAT)
+                        filename1 = conn.recv(msg_length4).decode(FORMAT)
                         print(filename1)
                         if not os.path.exists(filename1):
                             # Send an error message to the client
@@ -104,7 +107,7 @@ Please enter a number: '''.encode(FORMAT))
                         else:
                             # Open the file for reading
                             data = readfile(filename1)
-                            conn.send(data.encode(FORMAT))
+                            conn.send(data)
 
                     elif '4' == msg1:
                         conn.send('Do you want to view server files or local files?\n1 - Server\n2 - Local'.encode(FORMAT))
@@ -179,10 +182,9 @@ def readchat():
 def readfile(filename):
     with open(filename, 'rb') as f:
 
-        txt = f.read()
-        encode = chardet.detect(f.read())
-        print(encode)
-        txt.decode(encode)
+        txt = base64.b64encode(f.read())
+
+
     return txt
 
 print('server starting')
