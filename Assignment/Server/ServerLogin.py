@@ -9,8 +9,7 @@ import time
 import hashlib
 from datetime import datetime
 from pathlib import Path
-
-import chardet
+from struct import unpack, pack
 
 HEADER = 64
 BUFFER_SIZE = 1024
@@ -58,6 +57,7 @@ def handle_client(conn, addr):
     3 - download files
     4 - view files
     5 - disconnect
+    6 - batch
 Please enter a number: '''.encode(FORMAT))
                 msg_length1 = conn.recv(HEADER).decode(FORMAT)
                 if msg_length1:
@@ -81,17 +81,36 @@ Please enter a number: '''.encode(FORMAT))
                         msg_length5 = int(msg_length5)
                         filename = conn.recv(msg_length5).decode(FORMAT)
                         print(filename)
+                        t0 = time.time()
                         conn.send('uploading file'.encode(FORMAT))
+                        bs = conn.recv(8)
+                        (length,) = unpack('>Q', bs)
+                        length = int(length)
+
+                        numlist = [4,8,16,32,64,128,256,512,1024,2048,4096,8192]
+                        for x in numlist:
+
+                            if length % x == 0:
 
 
-                        filedata = conn.recv(4096*4096*32)
+                                num = x
+                        length = int(length / num)
 
 
                         with open(filename, 'wb') as file:
-                            txt = base64.b64decode(filedata+b'==')
+                            for x in range(length):
+                                filedata = conn.recv(num)
 
-                            # Receive the file in chunks and write each chunk to the file
-                            file.write(txt)
+                                txt = base64.b64decode(filedata+b'==')
+
+                                # Receive the file in chunks and write each chunk to the file
+                                file.write(txt)
+                        t1 = time.time()
+                        total = t1 - t0
+                        conn.send(total.encode(FORMAT))
+
+
+
 
                     elif '3' == msg1:
 
@@ -107,12 +126,14 @@ Please enter a number: '''.encode(FORMAT))
                         else:
                             # Open the file for reading
                             data = readfile(filename1)
-                            conn.send(data)
+                            length = pack('>Q', len(data))
+                            conn.sendall(length)
+                            conn.sendall(data)
 
                     elif '4' == msg1:
-                        conn.send('Do you want to view server files or local files?\n1 - Server\n2 - Local'.encode(FORMAT))
+                        conn.send(
+                            'Do you want to view server files or local files?\n1 - Server\n2 - Local'.encode(FORMAT))
                         msg_length3 = conn.recv(HEADER).decode(FORMAT)
-
 
                         msg_length3 = int(msg_length3)
                         msg = conn.recv(msg_length3).decode(FORMAT)
@@ -120,20 +141,49 @@ Please enter a number: '''.encode(FORMAT))
                         if msg == '1':
                             filelist = ''
                             for file in os.listdir(os.getcwd()):
-
                                 filelist += file + '\n'
-                            conn.send(('Files: \n' +filelist).encode(FORMAT))
+                            conn.send(('Files: \n' + filelist).encode(FORMAT))
 
                     elif msg1 == '5':
 
                         conn.close()
+                    elif '6' == msg1:
+                        t0 = time.time()
+                        a=0
+                        filelist=[]
+                        for x in os.listdir(os.getcwd()):
+                            a+=1
+                            filelist.append(x)
+                        print(a)
 
+                        conn.send(str(a).encode(FORMAT))
+                        print(filelist)
+
+                        filelist1 =' '.join(filelist)
+                        print(filelist1)
+                        conn.send(filelist1.encode(FORMAT))
+                        for x in filelist:
+
+                            data = readfile(x)
+
+                            length = pack('>Q', len(data))
+
+                            conn.sendall(length)
+                            conn.sendall(data)
+
+
+                        t1 = time.time()
+
+                        total = t1 - t0
+                        conn.send(str(total).encode(FORMAT))
 
 
 
 def login(conn):
-    conn.send("""please login to continue, if you already have an account press 1 if you want to make a new account press 0 """
-              .encode(FORMAT))
+    conn.send(
+        """please login to continue, if you already have an account press 1 if you want to make a new account press 0 """
+        .encode(FORMAT))
+
 
 def start():
     server.listen()
@@ -145,9 +195,10 @@ def start():
         print("\n")
         print(f"[ACTIVE CONNECTION] {threading.active_count() - 1}")
 
+
 def checkuserandpass(userandpass):
     userpasslist = userandpass.split('.!')
-    userpassword = userpasslist[0]+userpasslist[1]
+    userpassword = userpasslist[0] + userpasslist[1]
     code = userpasslist[2]
     username = userpasslist[0]
     if code == '0':
@@ -165,6 +216,7 @@ def checkuserandpass(userandpass):
             f.close()
             return 'invalid credentials', username
 
+
 def writetochatlog(user, message):
     now = datetime.now()
     dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
@@ -175,17 +227,18 @@ def writetochatlog(user, message):
         f.close()
         return 'chat added'
 
-def readchat():
 
-    txt = Path('chatlog.txt').read_text() +'\n please enter a message '
+def readchat():
+    txt = Path('chatlog.txt').read_text() + '\n please enter a message '
     return txt
+
+
 def readfile(filename):
     with open(filename, 'rb') as f:
-
         txt = base64.b64encode(f.read())
 
-
     return txt
+
 
 print('server starting')
 start()

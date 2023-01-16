@@ -6,6 +6,7 @@ import os
 import time
 import socket
 from pathlib import Path
+from struct import pack, unpack
 
 import chardet
 
@@ -38,7 +39,7 @@ def send(msg, client):
 
 def sendfile(msg, client):
 
-    client.send(msg)
+    client.sendall(msg)
     backmsg = (client.recv(2048).decode(FORMAT))
 
 
@@ -103,10 +104,14 @@ while True:
                 # Read the file in chunks and send each chunk to the server
                 filedata = readfile(file_name)
                 print(f'File {file_name} uploaded')
+                assert (len(filedata))
+                length = pack('>Q', len(filedata))
+                client.sendall(length)
 
                 sendfile(filedata, client)
+                print((client.recv(2048).decode(FORMAT)))
 
-                time.sleep(2)
+
                 send('test', client)
             elif l == '3':
 
@@ -118,14 +123,26 @@ while True:
                 send_length += b' ' * (HEADER - len(send_length))
                 client.send(send_length)
                 client.send(message)
-                filedata = client.recv(4096 * 4096 * 32)
+                bs = client.recv(8)
+                (length,) = unpack('>Q', bs)
+                length = int(length)
+
+                numlist = [4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192]
+                for x in numlist:
+
+                    if length % x == 0:
+                        num = x
+                length = int(length / num)
 
 
                 with open(filename1, 'wb') as file:
-                    txt = base64.b64decode(filedata+b'==')
+                    for x in range(length):
+                        filedata = client.recv(num)
 
-                    # Receive the file in chunks and write each chunk to the file
-                    file.write(txt)
+                        txt = base64.b64decode(filedata + b'==')
+
+                        # Receive the file in chunks and write each chunk to the file
+                        file.write(txt)
                 msg='gelukt'
                 message = msg.encode(FORMAT)
                 msg_length = len(message)
@@ -159,6 +176,46 @@ while True:
                 # Split the list of files into a Python list
                 file_list = file_list.split()
                 # Display the list of files
+            elif l == '6':
+
+                numfiles =t
+                filelist=[]
+                numfiles=int(numfiles)
+
+
+                name = (client.recv(4096))
+
+                name =name.decode(FORMAT)
+                namelist = name.split()
+                print(namelist)
+
+                for y in namelist:
+
+                    bs = client.recv(8)
+                    print(bs)
+                    (length,) = unpack('>Q', bs)
+                    length = int(length)
+
+                    numlist = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192]
+                    for z in numlist:
+
+                        if length % z == 0:
+                            num = z
+                    length = int(length / num)
+
+                    with open(y, 'wb') as file:
+
+                        for x in range(length):
+                            filedata = client.recv(num)
+
+                            txt = base64.b64decode(filedata + b'==')
+
+                            # Receive the file in chunks and write each chunk to the file
+                            file.write(txt)
+                print(filelist)
+                print('downloading')
+
+                print((client.recv(2048).decode(FORMAT)))
 
 
 
